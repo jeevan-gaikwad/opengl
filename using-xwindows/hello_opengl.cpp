@@ -8,6 +8,9 @@
 #include <X11/XKBlib.h>
 #include <X11/keysym.h>
 
+#include <GL/gl.h>
+#include <GL/glx.h>
+
 using namespace std;
 
 //global variable declarations
@@ -21,60 +24,83 @@ int giWindowHeight=600;
 
 void CreateWindow(void);
 void ToggleFullscreen(void);
+void initialize();
 void uninitialize();
+void resize(int,int);
+GLXContext gGLXContext;
+
 int main(int argc,char* argv[])
 {
 	int winWidth=giWindowWidth;
 	int winHeight=giWindowHeight;
-
+	bool bDone=false;
 	CreateWindow();
-
+	initialize();
 	//Message loop
 	XEvent event;
-    KeySym keysym;
+	KeySym keysym;
 
-    while(1){
+    while(bDone==false){
+
+	while(XPending(gpDisplay)){
+
         XNextEvent(gpDisplay,&event);
         switch(event.type){
-            case MapNotify:
-                break;
-            case KeyPress:
-                    keysym=XkbKeycodeToKeysym(gpDisplay,event.xkey.keycode,0,0);
-                    switch(keysym){
-                        case XK_Escape:
-                                uninitialize();
-                                exit(EXIT_SUCCESS);
-                        case XK_F:
-                        case XK_f:
-                                if(bFullscreen==false){
-                                    ToggleFullscreen();
-                                    bFullscreen=true;
-                                }else{
-                                    ToggleFullscreen();
-                                    bFullscreen=false;
-                                }
-                                break;
-						default:
-								break;
+		case MapNotify:
+                	break;
+		case KeyPress:
+                	keysym=XkbKeycodeToKeysym(gpDisplay,event.xkey.keycode,0,0);
+                    	switch(keysym){
+                        	case XK_Escape:
+                                	uninitialize();
+                                	exit(EXIT_SUCCESS);
+                        	case XK_F:
+                        	case XK_f:
+                                	if(bFullscreen==false){
+                                    		ToggleFullscreen();
+                                    		bFullscreen=true;
+                                	}else{
+                                    		ToggleFullscreen();
+                                    		bFullscreen=false;
+                                	}
+                                	break;
+				default:
+					break;
 
-                    }
+                    	}
+				break;
+		case ButtonPress:
+			switch(event.xbutton.button)
+			{
+				case 1:
 					break;
-			case MotionNotify:
+				case 2:
 					break;
-			case ConfigureNotify:
-					winWidth=event.xconfigure.width;
-					winHeight=event.xconfigure.height;
+				case 3:
 					break;
-			case Expose:
+				default:
 					break;
-			case DestroyNotify:
+			}
+				break;
+		case MotionNotify:
 					break;
-			case 33:
-					uninitialize();
-					exit(EXIT_SUCCESS);
+		case ConfigureNotify:
+			winWidth=event.xconfigure.width;
+			winHeight=event.xconfigure.height;
+			resize(winWidth,winHeight);
+				break;
+		case Expose:
+				break;
+		case DestroyNotify:
+				break;
+		case 33:
+				bDone=true;
+				uninitialize();
+				exit(EXIT_SUCCESS);
 			default:
 					break;
-    	}
+    			}
+		}
 	}
 	uninitialize();
 	exit(EXIT_SUCCESS);
@@ -86,7 +112,15 @@ void CreateWindow(void){
 	int defaultScreen;
 	int defaultDepth;
 	int styleMask;
-
+	static int frameBufferAttributes[]=
+	{
+		GLX_RGBA,
+		GLX_RED_SIZE,1,
+		GLX_GREEN_SIZE,1,
+		GLX_BLUE_SIZE,1,
+		GLX_ALPHA_SIZE,1,
+		None
+	};
 	gpDisplay=XOpenDisplay(NULL);
 	if(gpDisplay==NULL){
 		fprintf(stderr,"Error: Unable to open X Display.\n Exiting now..\n");
@@ -94,19 +128,11 @@ void CreateWindow(void){
 		exit(EXIT_FAILURE);
 	}
 	defaultScreen=XDefaultScreen(gpDisplay);
-	defaultDepth=DefaultDepth(gpDisplay,defaultScreen);
-	gpXVisualInfo=(XVisualInfo*)malloc(sizeof(XVisualInfo));
-	if(gpXVisualInfo==NULL){
-		fprintf(stderr,"Error: Unable to allocate memory for VisualInfo.\nExiting now...\n");
-		uninitialize();
-		exit(EXIT_FAILURE);
-	}
-	XMatchVisualInfo(gpDisplay,defaultScreen,defaultDepth,TrueColor,gpXVisualInfo);
-	if(gpXVisualInfo==NULL){
-		fprintf(stderr,"Error: Unable to get a Visual.\nExiting now...\n");
-		uninitialize();
-		exit(EXIT_FAILURE);
-	}
+	//defaultDepth=DefaultDepth(gpDisplay,defaultScreen);
+	gpXVisualInfo=glXChooseVisual(gpDisplay,defaultScreen,frameBufferAttributes);
+	
+	//XMatchVisualInfo(gpDisplay,defaultScreen,defaultDepth,TrueColor,gpXVisualInfo);
+	
 
 	winAttribs.border_pixel=0;
 	winAttribs.background_pixmap=0;
@@ -151,7 +177,31 @@ void ToggleFullscreen(void){
 	XSendEvent(gpDisplay,RootWindow(gpDisplay,gpXVisualInfo->screen),False, StructureNotifyMask,&xev);
 
 }
+
+void initialize(){
+	gGLXContext=glXCreateContext(gpDisplay,gpXVisualInfo,NULL,GL_TRUE);
+	glXMakeCurrent(gpDisplay,gWindow,gGLXContext);
+	glClearColor(1.0f,0.0f,0.0f,0.0f);
+	resize(giWindowHeight,giWindowHeight);
+}
+void display(){
+	glClear(GL_COLOR_BUFFER_BIT);
+	glFlush();
+}
+void resize(int width,int height){
+	if(height==0)
+		height=1;
+	glViewport(0,0,(GLsizei)width,(GLsizei)height);
+}
 void uninitialize(void){
+	GLXContext currentGLXContext;
+	currentGLXContext=glXGetCurrentContext();
+	if(currentGLXContext!=NULL && currentGLXContext==gGLXContext){
+		glXMakeCurrent(gpDisplay,0,0);
+	}
+	if(gGLXContext){
+		glXDestroyContext(gpDisplay,gGLXContext);
+	}
 	if(gWindow){
 		XDestroyWindow(gpDisplay,gWindow);
 	}
