@@ -30,6 +30,8 @@ GLXContext gGLXContext;
 
 void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void spin(void);
+GLuint	Texture_Kundali; //texture object for Kundali texture
+GLuint	Texture_Stone; //texture object for Stone texture
 //entry-point function
 int main(void)
 {
@@ -236,8 +238,10 @@ void ToggleFullscreen(void)
 
 void initialize(void)
 {
+
 	//function prototype
 	void resize(int, int);
+	int LoadGLTextures(GLuint *, TCHAR[]);
 	
 	//code
 	gGLXContext=glXCreateContext(gpDisplay,gpXVisualInfo,NULL,GL_TRUE);
@@ -247,6 +251,7 @@ void initialize(void)
 	glClearColor(1.0f,0.0f,0.0f,0.0f);
 	
 	resize(giWindowWidth,giWindowHeight);
+
 }
 
 void display(void)
@@ -254,100 +259,147 @@ void display(void)
 	//code
 	glClear(GL_COLOR_BUFFER_BIT);
     
-    glLoadIdentity();
+    // ###### PYRAMID ######
+
+	glLoadIdentity();
 	glTranslatef(-1.5f, 0.0f, -6.0f);
-	glRotatef(angleTri,0.0f,1.0f,0.0f);
+	glRotatef(angleTri, 0.0f, 1.0f, 0.0f);
+	glBindTexture(GL_TEXTURE_2D, Texture_Stone);
 	glBegin(GL_TRIANGLES);
-	//****FRONT FACE****
+	//NOTE : EACH FACE OF A PYRAMID (EXCEPT THE BASE/BOTTOM) IS A TRIANGLE
 
-	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex triangle
+	//NOTE : EACH FACE OF A PYRAMID (EXCEPT THE BASE/BOTTOM) IS A TRIANGLE
 
+	glTexCoord2f(0.5f, 1.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of left-bottom tip of triangle
-
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f); //left-bottom tip of triangle
 
-	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of right-bottom tip of triangle
-
+	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f); //right-bottom tip of triangle
 
 	//****RIGHT FACE****
-
-	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex of triangle
-
+	glTexCoord2f(0.5f, 1.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of left-bottom tip of triangle
-
+	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f); //left-bottom tip of triangle
 
-	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of right-bottom tip of triangle
-
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom tip of triangle
 
 	//****BACK FACE****
-
-	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex triangle
-
+	glTexCoord2f(0.5f, 1.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of left-bottom tip of triangle
-
+	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(1.0f, -1.0f, -1.0f); //left-bottom tip of triangle
 
-
-
-	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of right-bottom tip of triangle
-
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f); //right-bottom tip of triangle
 
-
-
 	//****LEFT FACE****
-
-	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex of triangle
-
+	glTexCoord2f(0.5f, 1.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-
-
-	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of left-bottom tip of triangle
-
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom tip of triangle
 
-
-	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of rigt-bottom tip of triangle
-
+	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f); //right-bottom tip of triangle
-
 	glEnd();
 
-	//###### SQUARE ######
+	// ###### CUBE ######
 
 	glLoadIdentity();
-
 	glTranslatef(1.5f, 0.0f, -6.0f);
-	glRotatef(angleSquare,1.0f,0.0f,0.0f);
+	glScalef(0.75f, 0.75f, 0.75f);
+	glRotatef(angleSquare, 1.0f, 1.0f, 1.0f);
+
+	glBindTexture(GL_TEXTURE_2D, Texture_Kundali);
 	glBegin(GL_QUADS);
-	//blue : Colour of square
-	glColor3f(0.0f, 0.0f, 1.0f);
-	// square
-	glVertex3f(1.0f, 1.0f, 0.0f); //right-top of square
-	glColor3f(1.0f, 0.0f, 1.0f);
+	//NOTE : EACH FACE OF A CUBE IS A SQUARE
 
-	glVertex3f(-1.0f, 1.0f, 0.00f); //left-top of square
-	glColor3f(0.0f, 1.0f, 1.0f);
+	//****TOP FACE****
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of top face
 
-	glVertex3f(-1.0f, -1.0f, 0.0f); //left-bottom of square
-	glColor3f(0.5f, 0.5f, 1.0f);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of top face
 
-	glVertex3f(1.0f, -1.0f, 0.00f); //right-bottom of square
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f); //left-bottom of top face
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f); //right-bottom of top face
+
+	//****BOTTOM FACE****
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f); //right-top of bottom face
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f); //left-top of bottom face
+
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of bottom face
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of bottom face
+
+	//****FRONT FACE****
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f); //right-top of front face
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f); //left-top of front face
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f); //left-bottom of front face
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f); //right-bottom of front face
+
+	//****BACK FACE****
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-top of back face
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-top of back face
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f); //left-bottom of back face
+
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f); //right-bottom of back face
+
+	//****LEFT FACE****
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f); //right-top of left face
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of left face
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of left face
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f); //right-bottom of left face
+
+	//****RIGHT FACE****
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of right face
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f); //left-top of right face
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f); //left-bottom of right face
+
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of right face
 
 	glEnd();
-
-	
-	glFlush();
 }
 
 void resize(int width,int height)
