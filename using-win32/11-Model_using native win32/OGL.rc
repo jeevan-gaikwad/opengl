@@ -1,0 +1,4 @@
+#include "Texture.h"
+
+// bitmap
+IDBITMAP_GLASS BITMAP DISCARDABLE "Glass.bmp"
