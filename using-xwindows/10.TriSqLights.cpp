@@ -10,11 +10,7 @@
 
 #include <GL/gl.h>
 #include <GL/glx.h>
-#include "SOIL.h"
-
-#define TRUE 1
-#define FALSE 0
-#include <GL/glu.h>
+//#include <GL/glu.h>
 //namespaces
 using namespace std;
 
@@ -31,11 +27,12 @@ GLfloat angleTri=0.0f;
 GLfloat angleSquare=0.0f;
 
 GLXContext gGLXContext;
-
+bool bLight = false; //for whether lighting is ON/OFF, by default 'off'
+GLfloat LightAmbient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+GLfloat LightDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat LightPosition[] = { 0.0f, 0.0f, 2.0f, 1.0f };
 void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void spin(void);
-GLuint	Texture_Kundali; //texture object for Kundali texture
-GLuint	Texture_Stone; //texture object for Stone texture
 //entry-point function
 int main(void)
 {
@@ -79,6 +76,19 @@ int main(void)
 						case XK_Escape:
 							uninitialize();
 							exit(0);
+						case XK_l:
+						case XK_L:
+							if (bLight == false)
+							{
+								bLight = true;
+								glEnable(GL_LIGHTING);
+							}
+							else
+							{
+								bLight = false;
+								glDisable(GL_LIGHTING);
+							}
+							break;
 						case XK_F:
 						case XK_f:
 							if(bFullscreen==false)
@@ -205,7 +215,7 @@ void CreateWindow(void)
 		exit(1);
 	}
 	
-	XStoreName(gpDisplay,gWindow,"One 2D Shape Perspective");
+	XStoreName(gpDisplay,gWindow,"Lighting The Pyramid And Cube");
 	
 	Atom windowManagerDelete=XInternAtom(gpDisplay,"WM_DELETE_WINDOW",True);
 	XSetWMProtocols(gpDisplay,gWindow,&windowManagerDelete,1);
@@ -242,11 +252,8 @@ void ToggleFullscreen(void)
 
 void initialize(void)
 {
-	static  char stone_path[]="/home/jeevan/opengl_progs/xwindows_opengl_by_me/opengl/opengl/using-xwindows/Stone.bmp";
-	static char kundali_path[]="/home/jeevan/opengl_progs/xwindows_opengl_by_me/opengl/opengl/using-xwindows/Vijay_Kundali.bmp";
 	//function prototype
 	void resize(int, int);
-	int LoadGLTextures(GLuint *, char *textureImage,int height,int width);
 	
 	//code
 	gGLXContext=glXCreateContext(gpDisplay,gpXVisualInfo,NULL,GL_TRUE);
@@ -254,10 +261,12 @@ void initialize(void)
 	glXMakeCurrent(gpDisplay,gWindow,gGLXContext);
 	
 	glClearColor(1.0f,0.0f,0.0f,0.0f);
-	LoadGLTextures(&Texture_Kundali, stone_path,256,256);
-	LoadGLTextures(&Texture_Stone,kundali_path ,256,256);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient); //setup ambient light
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse); //setup diffuse light
+	glLightfv(GL_LIGHT1, GL_POSITION, LightPosition); //position the light
+	glEnable(GL_TEXTURE_2D); //enable texture mapping
+	glEnable(GL_LIGHT1); //enable above configured LIGHT1 
 	resize(giWindowWidth,giWindowHeight);
-
 }
 
 void display(void)
@@ -265,147 +274,131 @@ void display(void)
 	//code
 	glClear(GL_COLOR_BUFFER_BIT);
     
-    // ###### PYRAMID ######
-
-	glLoadIdentity();
+    glLoadIdentity();
 	glTranslatef(-1.5f, 0.0f, -6.0f);
-	glRotatef(angleTri, 0.0f, 1.0f, 0.0f);
-	glBindTexture(GL_TEXTURE_2D, Texture_Stone);
+	glRotatef(angleTri,0.0f,1.0f,0.0f);
 	glBegin(GL_TRIANGLES);
-	//NOTE : EACH FACE OF A PYRAMID (EXCEPT THE BASE/BOTTOM) IS A TRIANGLE
+	//****FRONT FACE****
 
-	//NOTE : EACH FACE OF A PYRAMID (EXCEPT THE BASE/BOTTOM) IS A TRIANGLE
+	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex triangle
 
-	glTexCoord2f(0.5f, 1.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glTexCoord2f(0.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of left-bottom tip of triangle
+
 	glVertex3f(-1.0f, -1.0f, 1.0f); //left-bottom tip of triangle
 
-	glTexCoord2f(1.0f, 0.0f);
+	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of right-bottom tip of triangle
+
 	glVertex3f(1.0f, -1.0f, 1.0f); //right-bottom tip of triangle
 
 	//****RIGHT FACE****
-	glTexCoord2f(0.5f, 1.0f);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex of triangle
+
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glTexCoord2f(1.0f, 0.0f);
+	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of left-bottom tip of triangle
+
 	glVertex3f(1.0f, -1.0f, 1.0f); //left-bottom tip of triangle
 
-	glTexCoord2f(0.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of right-bottom tip of triangle
+
 	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom tip of triangle
 
 	//****BACK FACE****
-	glTexCoord2f(0.5f, 1.0f);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex triangle
+
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glTexCoord2f(1.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of left-bottom tip of triangle
+
 	glVertex3f(1.0f, -1.0f, -1.0f); //left-bottom tip of triangle
 
-	glTexCoord2f(0.0f, 0.0f);
+
+
+	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of right-bottom tip of triangle
+
 	glVertex3f(-1.0f, -1.0f, -1.0f); //right-bottom tip of triangle
 
+
+
 	//****LEFT FACE****
-	glTexCoord2f(0.5f, 1.0f);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of apex of triangle
+
 	glVertex3f(0.0f, 1.0f, 0.0f); //apex of triangle
 
-	glTexCoord2f(0.0f, 0.0f);
+
+
+	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of left-bottom tip of triangle
+
 	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom tip of triangle
 
-	glTexCoord2f(1.0f, 0.0f);
+
+	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of rigt-bottom tip of triangle
+
 	glVertex3f(-1.0f, -1.0f, 1.0f); //right-bottom tip of triangle
+
 	glEnd();
 
-	// ###### CUBE ######
+	//###### SQUARE ######
 
 	glLoadIdentity();
-	glTranslatef(1.5f, 0.0f, -6.0f);
-	glScalef(0.75f, 0.75f, 0.75f);
-	glRotatef(angleSquare, 1.0f, 1.0f, 1.0f);
 
-	glBindTexture(GL_TEXTURE_2D, Texture_Kundali);
+	glTranslatef(1.5f, 0.0f, -6.0f);
+	glRotatef(angleSquare,1.0f,0.0f,0.0f);
 	glBegin(GL_QUADS);
 	//NOTE : EACH FACE OF A CUBE IS A SQUARE
 
 	//****TOP FACE****
-	glTexCoord2f(0.0f, 1.0f);
+	glColor3f(1.0f, 0.0f, 0.0f); //red : Colour of top face
 	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of top face
-
-	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of top face
-
-	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(-1.0f, 1.0f, 1.0f); //left-bottom of top face
-
-	glTexCoord2f(1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f); //right-bottom of top face
 
 	//****BOTTOM FACE****
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(1.0f, -1.0f, 1.0f); //right-top of bottom face
-
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-1.0f, -1.0f, 1.0f); //left-top of bottom face
-
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of bottom face
-
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of bottom face
+	glColor3f(0.0f, 1.0f, 0.0f); //green : Colour of bottom face
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-top of bottom face
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-top of bottom face
+	glVertex3f(-1.0f, -1.0f, 1.0f); //left-bottom of bottom face
+	glVertex3f(1.0f, -1.0f, 1.0f); //right-bottom of bottom face
 
 	//****FRONT FACE****
-	glTexCoord2f(0.0f, 0.0f);
+	glColor3f(0.0f, 0.0f, 1.0f); //blue : Colour of front face
 	glVertex3f(1.0f, 1.0f, 1.0f); //right-top of front face
-
-	glTexCoord2f(1.0f, 0.0f);
 	glVertex3f(-1.0f, 1.0f, 1.0f); //left-top of front face
-
-	glTexCoord2f(1.0f, 1.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f); //left-bottom of front face
-
-	glTexCoord2f(0.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f); //right-bottom of front face
 
 	//****BACK FACE****
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(1.0f, -1.0f, -1.0f); //right-top of back face
-
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(-1.0f, -1.0f, -1.0f); //left-top of back face
-
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-1.0f, 1.0f, -1.0f); //left-bottom of back face
-
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(1.0f, 1.0f, -1.0f); //right-bottom of back face
+	glColor3f(1.0f, 1.0f, 0.0f); //yellow : Colour of back face
+	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of back face
+	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of back face
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of back face
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of back face
 
 	//****LEFT FACE****
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-1.0f, 1.0f, 1.0f); //right-top of left face
-
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of left face
-
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of left face
-
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-1.0f, -1.0f, 1.0f); //right-bottom of left face
+	glColor3f(0.0f, 1.0f, 1.0f); //cyan : Colour of left face
+	glVertex3f(-1.0f, 1.0f, 1.0f); //right-top of back face
+	glVertex3f(-1.0f, 1.0f, -1.0f); //left-top of back face
+	glVertex3f(-1.0f, -1.0f, -1.0f); //left-bottom of back face
+	glVertex3f(-1.0f, -1.0f, 1.0f); //right-bottom of back face
 
 	//****RIGHT FACE****
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of right face
+	glColor3f(1.0f, 0.0f, 1.0f); //magenta : Colour of right face
+	glVertex3f(1.0f, 1.0f, -1.0f); //right-top of back face
+	glVertex3f(1.0f, 1.0f, 1.0f); //left-top of back face
+	glVertex3f(1.0f, -1.0f, 1.0f); //left-bottom of back face
+	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of back face
 
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(1.0f, 1.0f, 1.0f); //left-top of right face
-
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(1.0f, -1.0f, 1.0f); //left-bottom of right face
-
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(1.0f, -1.0f, -1.0f); //right-bottom of right face
 
 	glEnd();
+
+	
+	glFlush();
 }
 
 void resize(int width,int height)
@@ -424,42 +417,6 @@ void resize(int width,int height)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-}
-int LoadGLTextures(GLuint *texture, char* textureImage,int height,int width)
-{
-	//variable declarations
-	//HBITMAP hBitmap;
-	//BITMAP bmp;
-	int iStatus = FALSE;
-	unsigned char* image;
-	//code
-	glGenTextures(1, texture); //1 image
-	*texture = SOIL_load_OGL_texture // load an image file directly as a new OpenGL texture 
-	(
-		textureImage,
-		SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID,
-		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-	);
-	
-	if (*texture) //if bitmap exists 
-	{
-		iStatus = TRUE;	
-		glActiveTexture(GL_TEXTURE0);
-    		glBindTexture(GL_TEXTURE_2D, *texture);
-        	image = SOIL_load_image(textureImage, &width, &height, 0, SOIL_LOAD_RGB);
-        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        	SOIL_free_image_data(image);	
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 4); //pixel storage mode (word alignment/4 bytes)
-		//glBindTexture(GL_TEXTURE_2D, *texture); //bind texture
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		//generate mipmapped texture (3 bytes, width, height & data from bmp)
-		gluBuild2DMipmaps(GL_TEXTURE_2D);
-
-		//DeleteObject(hBitmap); //delete unwanted bitmap handle
-	}
-	return(iStatus);
 }
 void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
