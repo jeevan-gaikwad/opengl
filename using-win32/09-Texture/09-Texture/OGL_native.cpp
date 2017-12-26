@@ -13,6 +13,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void spin(void);
+//Adding a test line
 //Global variable declarations
 HWND ghwnd = NULL;
 HDC ghdc = NULL;
