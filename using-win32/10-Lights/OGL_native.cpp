@@ -30,7 +30,7 @@ GLuint	Texture_Stone; //texture object for Stone texture
 //main()
 //Lights
 bool bLight = false; //for whether lighting is ON/OFF, by default 'off'
-GLfloat LightAmbient[] = { 0.5f, 0.5f, 1.0f, 1.0f };
+GLfloat LightAmbient[] = { 0.5f, 0.5f, 2.5f, 1.0f };
 GLfloat LightDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 GLfloat LightPosition[] = { 0.0f, 0.0f, 2.0f, 1.0f };
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
