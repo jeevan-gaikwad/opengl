@@ -216,6 +216,7 @@ void display(void)
 
 	//to clear all pixels
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//Reset model view matrix
 	glLoadIdentity();
 	glTranslatef(-1.5f, 0.0f, -6.0f);
 	glRotatef(angleTri, 0.0f, 1.0f, 0.0f);
