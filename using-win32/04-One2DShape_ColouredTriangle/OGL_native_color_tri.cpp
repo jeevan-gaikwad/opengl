@@ -242,7 +242,7 @@ void initialize(void)
 	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;
 	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
+	pfd.cColorBits = 8;
 	pfd.cRedBits = 8;
 	pfd.cGreenBits = 8;
 	pfd.cBlueBits = 8;
