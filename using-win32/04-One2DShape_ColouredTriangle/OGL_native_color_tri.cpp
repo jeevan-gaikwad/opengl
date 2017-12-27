@@ -82,7 +82,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	//Message Loop
 	while (bDone == false)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (PeekMessage(&msg, NULL, 0, NOT_NULL, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
 				bDone = true;
